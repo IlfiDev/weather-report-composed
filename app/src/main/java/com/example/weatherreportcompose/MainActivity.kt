@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
                 Column (verticalArrangement = Arrangement.spacedBy(100.dp),
                 horizontalAlignment = Alignment.CenterHorizontally){
                     Header()
+                    MainInfo()
                     val cardData = HourData("13 am", R.drawable.ic_launcher_background, "32 C")
                     val weatherData = WeatherData(10, 50, 80)
                     weatherInfoCard(weatherData = weatherData)
@@ -72,6 +73,22 @@ fun Navigation() {
     val navController = rememberNavController()
 
 
+}
+@Preview
+@Composable
+fun MainInfo(){
+    Column(modifier = Modifier
+        .size(135.dp, 220.dp),
+    horizontalAlignment = Alignment.CenterHorizontally) {
+        Image(painter = painterResource(id = R.drawable.cloud),
+        contentDescription = null,
+        modifier = Modifier.size(220.dp, 134.dp))
+        Text("26C")
+        Text("Cloudy")
+        Text("Date")
+
+
+    }
 }
 @Composable
 fun DisplayWeatherCards(){
