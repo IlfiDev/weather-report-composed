@@ -88,7 +88,7 @@ fun ScreenHome(weatherViewModel: MainPageViewModel = viewModel(), navController:
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Header()
+        Header(weatherViewModel)
         MainInfo(weather)
         Column(
             verticalArrangement = Arrangement.SpaceEvenly,
@@ -188,7 +188,7 @@ fun hoursCard(hourData: WeatherItem) {
     Card(
         modifier = Modifier
             .size(80.dp, 122.dp), shape = RoundedCornerShape(18.dp),
-        backgroundColor = Color(0xFF2D3335)
+        backgroundColor = Color(0x19C9DBED)
     ) {
         Box(
             modifier = Modifier
@@ -212,7 +212,7 @@ fun hoursCard(hourData: WeatherItem) {
 
                     )
                 Text(
-                    temperature.roundToInt().toBigDecimal().toString(),
+                    temperature.roundToInt().toBigDecimal().toString() + "°C",
                     style = TextStyle(color = Color.White, fontSize = 14.sp)
                 )
             }
@@ -238,7 +238,7 @@ fun weatherItems(value: String, imageId: Int, type: String) {
             modifier = Modifier.size(24.dp),
         )
 
-        Text(value, style = TextStyle(color = Color.White, fontSize = 14.sp))
+        Text(value + "°", style = TextStyle(color = Color.White, fontSize = 14.sp))
         Text(type, style = TextStyle(color = Color(0xFF9BA0AB), fontSize = 10.sp))
     }
 }
@@ -250,7 +250,7 @@ fun weatherInfoCard(weatherData: WeatherItem) {
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .height(91.dp),
-        backgroundColor = Color(0xFF2D3335)
+        backgroundColor = Color(0x19C9DBED)
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceAround,
@@ -267,7 +267,7 @@ fun weatherInfoCard(weatherData: WeatherItem) {
                 type = "Humidity"
             )
             weatherItems(
-                weatherData.main.pressure.toString(),
+                weatherData.rain.lh.toString() + "%",
                 R.drawable.ic_launcher_background,
                 "Rain"
             )

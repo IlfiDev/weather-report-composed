@@ -16,7 +16,9 @@ data class Main(
 data class Clouds(
     val all: Int
 )
-
+data class Rain(
+    val lh: Int
+)
 
 data class Coord(
     val lat: Double,
@@ -50,6 +52,7 @@ data class WeatherItem(
     val timezone: Int = 0,
     val visibility: Int = 0,
     val weather: List<WeatherX> = listOf(WeatherX("", "" ,0, "")),
+    val rain: Rain = Rain(1),
     val wind: Wind = Wind(-1, -1.1, -1.1),
     val dt_txt: String = "2022-08-30 15:00:00"
 )

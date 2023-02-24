@@ -38,3 +38,17 @@ object RetrofitIPLocationClient {
         return retrofit!!
     }
 }
+
+object RetrofitCityAPIClient {
+    var retrofit : Retrofit? = null
+
+    fun getCitYSuggestion(): Retrofit {
+        if (retrofit == null){
+            retrofit = Retrofit.Builder()
+                .baseUrl("https://api.geoapify.com/v1/geocode/autocomplete?text=")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+        }
+        return retrofit!!
+    }
+}
