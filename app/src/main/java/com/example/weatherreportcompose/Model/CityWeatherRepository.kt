@@ -16,7 +16,7 @@ import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
 
-class CityWeatherRepository(){
+class CityWeatherRepository() {
     val APIKey = BuildConfig.API_KEY
     val apiServices = RetrofitClient.getClient().create(RetrofitServices::class.java)
 
@@ -26,61 +26,30 @@ class CityWeatherRepository(){
         data class Error(val exception: Exception) : Result<Nothing>()
     }
 
-    suspend fun getCurrentWeather(city: String, weatherCallback: MutableStateFlow<WeatherItem>) : Response<WeatherItem>{
+    suspend fun getCurrentWeather(city: String): Response<WeatherItem> {
         val response = apiServices.getCurrentWeatherList("weather?q=${city}&appid=${APIKey}")
-            try{
-                if (response.isSuccessful){
-                    return response
-                }
-                else{
-                    Log.e("tag","Error:${response.code()}")
-                }
-            }catch(e: HttpException){}
+        try {
+            if (response.isSuccessful) {
+                return response
+            } else {
+                Log.e("tag", "Error:${response.code()}")
+            }
+        } catch (e: HttpException) {
+        }
         return response
     }
 
-    suspend fun getWeatherForecast(city: String) : Response<ForecastItem>{
+    suspend fun getWeatherForecast(city: String): Response<ForecastItem> {
         val response = apiServices.getFiveDaysWeather("forecast?q=${city}&appid=${APIKey}")
-        try{
-            if(response.isSuccessful){
+        try {
+            if (response.isSuccessful) {
                 return response
-            }
-            else{
+            } else {
                 Log.e("Forecast", "Error:${response.code()}")
             }
+        } catch (e: HttpException) {
         }
-        catch (e: HttpException){}
         return response
     }
-//        call.enqueue(object : Callback<WeatherItem> {
-//            override fun onResponse(call : Call<WeatherItem>, response : Response<WeatherItem>){
-//                Log.d("Weather", response.body().toString())
-//                if(response.isSuccessful) {
-//                    return response.body()!!
-//                    Log.d("Weather", response.body().toString())
-//                }
-//
-//            }
-//            override fun onFailure(call : Call<WeatherItem>, t: Throwable){
-//                Log.e("WeatherError", t.toString() )
-//            }
-//        })
 }
-//    fun getWeatherForTheWeek(city: String){
-//        val call = apiServices.getFiveDaysWeather("forecast?q=${city}&appid=${APIKey}")
-//        call.enqueue(object  : Callback<ForecastItem>{
-//            override fun onResponse(call : Call<ForecastItem>, response : Response<ForecastItem>){
-//                if(response.isSuccessful){
-//                    return response.body()!!
-//                    Log.d("Weather", response.body().toString())
-//                }
-//
-//            }
-//            override fun onFailure(call : Call<ForecastItem>, t: Throwable){
-//                Log.e("WeatherError", t.toString() )
-//            }
-//
-//        })
-//    }
-
 

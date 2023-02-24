@@ -1,5 +1,6 @@
 package com.example.weatherreportcompose.Model.DataClasses
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
 data class Main(
@@ -48,9 +49,9 @@ data class WeatherItem(
     val sys: Sys = Sys("", -1, -1),
     val timezone: Int = 0,
     val visibility: Int = 0,
-    val weather: List<WeatherX> = emptyList(),
+    val weather: List<WeatherX> = listOf(WeatherX("", "" ,0, "")),
     val wind: Wind = Wind(-1, -1.1, -1.1),
-    val dt_txt: String = ""
+    val dt_txt: String = "2022-08-30 15:00:00"
 )
 data class WeatherX(
     val description: String,
@@ -65,5 +66,5 @@ data class Wind(
 )
 
 data class ForecastItem(
-    @SerializedName("list") val list: List<WeatherItem>
+    val list: List<WeatherItem> = listOf(WeatherItem())
 )
