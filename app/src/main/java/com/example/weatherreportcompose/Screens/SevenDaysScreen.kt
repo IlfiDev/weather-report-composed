@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.weatherreportcompose.*
 import com.example.weatherreportcompose.Model.DataClasses.ForecastItem
 import com.example.weatherreportcompose.Model.DataClasses.Main
@@ -33,7 +34,7 @@ import com.example.weatherreportcompose.ui.theme.WeatherReportComposeTheme
 
 
 @Composable
-fun ScreenSeven(weatherViewModel: MainPageViewModel = viewModel()){
+fun ScreenSeven(weatherViewModel: MainPageViewModel = viewModel(), navController: NavController){
     val weatherItem = weatherViewModel.weather.collectAsState().value
     val forecastItem = weatherViewModel.forecast.collectAsState().value
 
@@ -42,7 +43,7 @@ fun ScreenSeven(weatherViewModel: MainPageViewModel = viewModel()){
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(20.dp)){
 
-        Header(weatherViewModel)
+        Header(weatherViewModel, navController = navController)
         SevenDaysMainInfo(weatherItem = weatherItem)
         weatherInfoCard(weatherData = weatherItem)
         DaysColumn(forecastItem)

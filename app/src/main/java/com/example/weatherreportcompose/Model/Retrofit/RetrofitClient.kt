@@ -45,7 +45,7 @@ object RetrofitCityAPIClient {
     fun getCitYSuggestion(): Retrofit {
         if (retrofit == null){
             retrofit = Retrofit.Builder()
-                .baseUrl("https://api.geoapify.com/v1/geocode/autocomplete?text=")
+                .baseUrl("https://api.geoapify.com/v1/geocode/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
         }

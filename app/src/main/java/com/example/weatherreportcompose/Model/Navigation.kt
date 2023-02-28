@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.weatherreportcompose.MainActivity
 import com.example.weatherreportcompose.Screen
 import com.example.weatherreportcompose.ScreenHome
+import com.example.weatherreportcompose.Screens.SearchScreen
 import com.example.weatherreportcompose.ViewModel.MainPageViewModel
 import com.example.weatherreportcompose.ViewModel.ScreenSeven
 
@@ -23,7 +24,12 @@ fun Navigation(){
         composable(
             route = Screen.SevenDays.route
         ){ backStackEntry ->
-            ScreenSeven(weatherViewModel = weatherViewModel)
+            ScreenSeven(weatherViewModel = weatherViewModel, navController = navController)
+        }
+
+        composable(route = Screen.SearchScreen.route){
+            navBackStackEntry ->
+            SearchScreen()
         }
     }
 }

@@ -20,6 +20,7 @@ android {
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
         buildConfigField "String", "API_KEY", "\"${properties.getProperty("API_KEY")}\""
+        buildConfigField "String", "CITY_API_KEY", "\"${properties.getProperty("CITY_API_KEY")}\""
     }
 
     buildTypes {
