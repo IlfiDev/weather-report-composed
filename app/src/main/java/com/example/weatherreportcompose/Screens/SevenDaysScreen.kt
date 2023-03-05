@@ -34,11 +34,11 @@ import com.example.weatherreportcompose.ui.theme.WeatherReportComposeTheme
 
 
 @Composable
-fun ScreenSeven(weatherViewModel: MainPageViewModel = viewModel(), navController: NavController){
+fun ScreenSeven(weatherViewModel: MainPageViewModel, navController: NavController){
     val weatherItem = weatherViewModel.weather.collectAsState().value
     val forecastItem = weatherViewModel.forecast.collectAsState().value
 
-    screenBackground()
+    screenBackground(weatherViewModel)
     Column(modifier = Modifier.fillMaxSize(),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(20.dp)){

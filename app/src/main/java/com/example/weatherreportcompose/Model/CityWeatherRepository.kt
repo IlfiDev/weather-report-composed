@@ -21,13 +21,8 @@ class CityWeatherRepository() {
     val apiServices = RetrofitClient.getClient().create(RetrofitServices::class.java)
 
 
-    sealed class Result<out R> {
-        data class Success<out T>(val data: T) : Result<T>()
-        data class Error(val exception: Exception) : Result<Nothing>()
-    }
-
-    suspend fun getCurrentWeather(city: String): Response<WeatherItem> {
-        val response = apiServices.getCurrentWeatherList("weather?q=${city}&appid=${APIKey}")
+    suspend fun getCurrentWeather(lat: Double, lon: Double, city: String = ""): Response<WeatherItem> {
+        val response = apiServices.getCurrentWeatherList("weather?lat=${lat}&lon=${lon}&appid=${APIKey}")
         try {
             if (response.isSuccessful) {
                 return response
@@ -39,8 +34,8 @@ class CityWeatherRepository() {
         return response
     }
 
-    suspend fun getWeatherForecast(city: String): Response<ForecastItem> {
-        val response = apiServices.getFiveDaysWeather("forecast?q=${city}&appid=${APIKey}")
+    suspend fun getWeatherForecast(lat: Double, lon: Double, city: String): Response<ForecastItem> {
+        val response = apiServices.getFiveDaysWeather("forecast?lat=${lat}&lon=${lon}&appid=${APIKey}")
         try {
             if (response.isSuccessful) {
                 return response

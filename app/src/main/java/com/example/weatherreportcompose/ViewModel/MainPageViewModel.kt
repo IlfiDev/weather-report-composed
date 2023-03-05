@@ -1,8 +1,19 @@
 package com.example.weatherreportcompose.ViewModel
 
+import android.app.Application
+import android.content.Context
+import android.os.Debug
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.room.Room
+import com.example.weatherreportcompose.MainActivity
+import com.example.weatherreportcompose.Model.CityApi.CitySuggestionModel
+import com.example.weatherreportcompose.Model.CityApi.CitySuggestionRepository
+import com.example.weatherreportcompose.Model.CityApi.CitySuggestions
 import com.example.weatherreportcompose.Model.CityWeatherRepository
+import com.example.weatherreportcompose.Model.DB.*
 import com.example.weatherreportcompose.Model.DataClasses.ForecastItem
 import com.example.weatherreportcompose.Model.DataClasses.WeatherItem
 import com.example.weatherreportcompose.Model.IPLocation.IpGeolocation
@@ -13,11 +24,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
-class MainPageViewModel() : ViewModel() {
+class MainPageViewModel(private val application: Application) : AndroidViewModel(application) {
 
     val weatherRepository = CityWeatherRepository()
     val locationRepository = IpLocationRepository()
+    val suggestionRepository = CitySuggestionRepository()
+    private lateinit var locationsRepository: LocationsRepository
     private val _location = MutableStateFlow(IpGeolocation())
     val location = _location.asStateFlow()
 
@@ -27,49 +41,110 @@ class MainPageViewModel() : ViewModel() {
     private val _forecast = MutableStateFlow(ForecastItem())
     val forecast = _forecast.asStateFlow()
 
+    private val _suggestion = MutableStateFlow(CitySuggestions())
+    val suggestion = _suggestion.asStateFlow()
+
+    val home = Location(1, "home", "home", 0.0, 0.0)
+    private val _citiesDB = MutableStateFlow(listOf(home))
+    val cities = _citiesDB.asStateFlow()
+
+    private var position = -1
+
     init {
         updateHome()
+        val locationsDao = LocationsDatabase.getInstance(application).locationDao()
+        locationsRepository = LocationsRepository(locationsDao)
+        getCities()
+
+    }
+
+    fun moveToNext(){
+        if(position + 1 < _citiesDB.value.size){
+
+            position++
+            Log.w("Pos", position.toString())
+            val city = _citiesDB.value[position]
+            val lat = city.lat
+            val lon = city.lon
+            val name = city.name
+
+            Log.e("cityName", name.toString())
+            updateWeather(lat!!, lon!!, name!!)
+            updateForecast(lat, lon, name)
+        }
+
+
+
+    }
+    fun moveToPrevious(){
+        position--
+        Log.w("Pos", position.toString())
+        if(position > 0){
+
+            val city = _citiesDB.value[position]
+            val lat = city.lat
+            val lon = city.lon
+            val name = city.name
+            Log.e("cityName", name.toString())
+            updateWeather(lat!!, lon!!, name!!)
+            updateForecast(lat, lon, name)
+        }
+        else{
+            position = -1
+            updateHome()
+        }
+
+    }
+    fun removeCity(location: Location) = runBlocking{
+        rmCity(location)
+        getCitiesFromRepo()
+    }
+    private suspend fun rmCity(location: Location) = coroutineScope {
+        CoroutineScope(Dispatchers.IO).launch{
+            locationsRepository.removeLocation(location)
+        }
+    }
+    fun getCities() = runBlocking{
+       getCitiesFromRepo()
+    }
+
+    private suspend fun getCitiesFromRepo() = coroutineScope{
+        CoroutineScope(Dispatchers.IO).launch{
+            val cities = locationsRepository.getLocations()
+            Log.w("DB", _citiesDB.toString())
+            withContext(Dispatchers.Main){
+                _citiesDB.value = cities
+            }
+        }
     }
     fun updateHome() = runBlocking {
         updateCurrentLocation()
     }
     suspend fun updateCurrentLocation() = coroutineScope {
+        var loc = IpGeolocation()
         val job = launch {
             val response = locationRepository.getLocation()
             Log.e("IP", response.body().toString())
+
             _location.value = response.body()!!
+            loc = _location.value
+            Log.e("Loc", loc.toString())
         }
         job.join()
         launch {
-            launch{updateWeather(_location.value.city)}
-            launch{updateForecast(_location.value.city)}
-        }
-//        job.join()
-//        launch{updateWeather(_location.value.city)}
-//        launch{updateForecast(_location.value.city)}
-//        updateAll(_location.value.city)
-    }
-    fun updateAll(city: String){
-        updateWeather(city)
-        updateForecast(city)
-    }
-    suspend fun updateWeatherC(city: String) = coroutineScope{
-        val response = weatherRepository.getCurrentWeather(city)
-        Log.e("Weather", response.body().toString())
-        withContext(Dispatchers.Main) {
-            _weather.value = response.body()!!
+            launch{
+                updateWeather(loc.lat, loc.lon, loc.city)
+            }
+            launch{
+                updateForecast(loc.lat, loc.lat, loc.city)
+            }
         }
     }
-    suspend fun updateForecastC(city: String) = coroutineScope {
-        val response = weatherRepository.getWeatherForecast(city)
-        Log.e("Forecast", response.body().toString())
-        withContext(Dispatchers.Main){
-            _forecast.value = response.body()!!
-        }
-    }
-    fun updateWeather(city: String) {
+
+
+    fun updateWeather(lat:Double, lon: Double, city: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            val response = weatherRepository.getCurrentWeather(city)
+            val response = weatherRepository.getCurrentWeather(lat, lon, city)
             Log.e("Weather", response.body().toString())
             withContext(Dispatchers.Main) {
                 _weather.value = response.body()!!
@@ -78,12 +153,60 @@ class MainPageViewModel() : ViewModel() {
     }
 
 
-    fun updateForecast(city: String) {
+    fun updateForecast(lat:Double, lon: Double, city: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            val response = weatherRepository.getWeatherForecast(city)
+            val response = weatherRepository.getWeatherForecast(lat, lon, city)
             Log.e("Forecast", response.body().toString())
             withContext(Dispatchers.Main){
                 _forecast.value = response.body()!!
+            }
+        }
+    }
+
+
+
+    fun getSuggestion(request: String) = runBlocking {
+        CoroutineScope(Dispatchers.IO).launch{
+            updateSuggstion(request)
+        }
+    }
+
+    suspend fun updateSuggstion(request: String) {
+        if ( request.length >=3){
+
+            val response = suggestionRepository.getCitySuggestion(request)
+            _suggestion.value = response.body()!!
+        }
+
+    }
+
+    fun addCity(suggestion: CitySuggestionModel) = runBlocking{
+
+        val city = Location(name = suggestion.name, lat = suggestion.lat, lon = suggestion.lon, country = suggestion.country)
+        addCityToDB(city)
+    }
+
+    private suspend fun addCityToDB(city: Location){
+        CoroutineScope(Dispatchers.IO).launch {
+
+            locationsRepository.addLocation(city)
+
+            getCitiesFromRepo()
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory{
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(
+                modelClass: Class<T>,
+                extras: CreationExtras
+            ): T {
+                val application = checkNotNull(extras[APPLICATION_KEY])
+
+                return MainPageViewModel(
+                    application
+                ) as T
             }
         }
     }
