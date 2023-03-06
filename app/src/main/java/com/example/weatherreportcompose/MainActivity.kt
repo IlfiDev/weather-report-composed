@@ -3,14 +3,12 @@ package com.example.weatherreportcompose
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -29,25 +27,43 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.weatherreportcompose.Model.DataClasses.ForecastItem
 import com.example.weatherreportcompose.Model.DataClasses.WeatherItem
 import com.example.weatherreportcompose.Model.Navigation
 import com.example.weatherreportcompose.ViewModel.MainPageViewModel
 import com.example.weatherreportcompose.ui.theme.WeatherReportComposeTheme
-import dagger.hilt.android.AndroidEntryPoint
+import com.vk.api.sdk.*
+import com.vk.api.sdk.auth.VKAccessToken
+import com.vk.api.sdk.auth.VKAuthCallback
+import com.vk.api.sdk.auth.VKScope
+import com.vk.api.sdk.exceptions.VKAuthException
+import com.vk.api.sdk.internal.ApiCommand
+import com.vk.api.sdk.requests.VKRequest
+import com.vk.api.sdk.utils.VKUtils.getCertificateFingerprint
+import com.vk.sdk.api.photos.dto.PhotosGetAlbumsResponse
+import com.vk.sdk.api.users.dto.UsersGetNameCase
+import com.vk.sdk.api.users.dto.UsersSubscriptionsItem
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val fingerprints = getCertificateFingerprint(this, this.packageName)
+        Log.w("fingerprint", fingerprints?.get(0)!!)
+        VK.login(this, arrayListOf(VKScope.PHOTOS, VKScope.WALL, VKScope.AUDIO))
+        val call = VKMethodCall.Builder()
+            .method("users.get")
+            .args("fields", "photo_200")
+            .version("v5.131")
+            .build()
+
+        val request = VKApiManager.execute
+        VK.execute(request = PhotosGetAlbumsResponse())
         setContent {
             WeatherReportComposeTheme {
                 Navigation(application)
@@ -59,8 +75,23 @@ class MainActivity : ComponentActivity() {
 
 
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val callback = object: VKAuthCallback{
+            override fun onLogin(token: VKAccessToken){
+                Log.i("Auth", "Success")
+            }
 
+            override fun onLoginFailed(authException: VKAuthException) {
+                Log.e("Auth", "Failed")
+            }
+        }
+        if (data == null || !VK.onActivityResult(requestCode = requestCode, resultCode, data, callback)){
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
 }
+
 
 val images = mapOf(
     "Thunderstorm" to R.drawable.property_1_thunderstorm_b,
@@ -90,7 +121,7 @@ val smallImages = mapOf(
     "Fog" to R.drawable.condition_cloudy,
     "Ash" to R.drawable.condition_cloudy,
     "Squall" to R.drawable.condition_cloudy,
-    "Tornado" to R.drawable.condition_cloudy,
+    "Tornado" to R.drawable.condition_tornado,
     "Clear" to R.drawable.condition_sunny,
     "Clouds" to R.drawable.condition_cloudy
 )
