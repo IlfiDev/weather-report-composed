@@ -1,7 +1,9 @@
 package com.example.weatherreportcompose
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,10 +12,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +39,9 @@ import com.example.weatherreportcompose.Model.DataClasses.WeatherItem
 import com.example.weatherreportcompose.Model.Navigation
 import com.example.weatherreportcompose.ViewModel.MainPageViewModel
 import com.example.weatherreportcompose.ui.theme.WeatherReportComposeTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.vk.api.sdk.*
 import com.vk.api.sdk.auth.VKAccessToken
 import com.vk.api.sdk.auth.VKAuthCallback
@@ -82,15 +89,33 @@ class MainActivity : ComponentActivity() {
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
+
+
+
 }
 
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun ContactsPermission() {
+    val perm = rememberPermissionState(permission = android.Manifest.permission.READ_CONTACTS)
+    if (perm.status.isGranted) {
+
+    } else {
+        Column {
+            Button(onClick = { perm.launchPermissionRequest() }) {
+                Text("Request permission")
+            }
+        }
+    }
+}
 
 val images = mapOf(
     "Thunderstorm" to R.drawable.property_1_thunderstorm_b,
     "Drizzle" to R.drawable.property_1_sun_and_rain_b,
     "Rain" to R.drawable.property_1_heavy_rain_b,
     "Snow" to R.drawable.property_1_snow_b,
-    "Mist" to R.drawable.property_1_cloudy_b,
+    "Mist" to R.drawable.cloud,
     "Smoke" to R.drawable.cloud,
     "Haze" to R.drawable.cloud,
     "Dust" to R.drawable.cloud,
@@ -101,6 +126,7 @@ val images = mapOf(
     "Clear" to R.drawable.property_1_sun_b,
     "Clouds" to R.drawable.property_1_mostly_cloudy_b
 )
+
 val smallImages = mapOf(
     "Thunderstorm" to R.drawable.condition_thunderstorm,
     "Drizzle" to R.drawable.condition_rain_opportunity,
@@ -117,6 +143,43 @@ val smallImages = mapOf(
     "Clear" to R.drawable.condition_sunny,
     "Clouds" to R.drawable.condition_cloudy
 )
+@SuppressLint("Range")
+@Composable
+private fun getContactNames() : List<String>{
+    val contacts = ArrayList<String>()
+    val contentResolver = LocalContext.current.contentResolver
+    val cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null)
+
+    if (cursor!!.moveToFirst()){
+        do{
+            val name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+            contacts.add(name)
+
+
+        } while (cursor.moveToNext())
+    }
+    cursor.close()
+    return contacts
+
+}
+@Composable
+fun DisplayContacts(){
+    val names = getContactNames()
+    LazyColumn {
+       items(names){
+           item -> ContactCard(name = item)
+
+       }
+    }
+}
+@Composable
+fun ContactCard(name: String){
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(20.dp)){
+        Text(name)
+    }
+}
 @Composable
 fun ScreenHome(weatherViewModel: MainPageViewModel, navController: NavController) {
     val weather by weatherViewModel.weather.collectAsState()
@@ -127,6 +190,8 @@ fun ScreenHome(weatherViewModel: MainPageViewModel, navController: NavController
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        ContactsPermission()
         Header(weatherViewModel, navController)
         MainInfo(weather)
         Column(
@@ -143,7 +208,9 @@ fun ScreenHome(weatherViewModel: MainPageViewModel, navController: NavController
             ) {
                 val style = TextStyle(fontSize = 14.sp, color = Color.White)
                 Text("today", style = style)
-                Text("Tomorrow", style = style)
+                Text("Tomorrow", style = style, modifier = Modifier.clickable {
+                    navController.navigate(Screen.Scree.route)
+                })
                 Text("Next 7 days", style = style,
                     modifier = Modifier.clickable {
                         navController.navigate(Screen.SevenDays.route)
@@ -153,7 +220,9 @@ fun ScreenHome(weatherViewModel: MainPageViewModel, navController: NavController
             DisplayWeatherCards(forecastItem = forecast)
         }
 
+
     }
+
 }
 
 
@@ -188,13 +257,13 @@ fun MainInfo(weather: WeatherItem) {
 fun DisplayWeatherCards(forecastItem: ForecastItem) {
     val weatherItem: List<WeatherItem>
     if (forecastItem.list.size == 1){
-       weatherItem = listOf(WeatherItem())
+        weatherItem = listOf(WeatherItem())
     }
     else{
         weatherItem = forecastItem.list.slice(0..7)
     }
     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp),
-    modifier = Modifier.padding(horizontal = 20.dp)) {
+        modifier = Modifier.padding(horizontal = 20.dp)) {
         items(weatherItem) { arrItem ->
             hoursCard(hourData = arrItem)
         }

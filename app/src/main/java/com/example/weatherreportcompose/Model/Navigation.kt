@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
+import com.example.weatherreportcompose.DisplayContacts
 import com.example.weatherreportcompose.MainActivity
 import com.example.weatherreportcompose.Model.DB.LocationsDB
 import com.example.weatherreportcompose.Screen
@@ -36,6 +37,10 @@ fun Navigation(application: Application){
         composable(route = Screen.SearchScreen.route){
             navBackStackEntry ->
             SearchScreen(weatherViewModel = weatherViewModel)
+        }
+        composable(route = Screen.Scree.route){
+            navBackStackEntry ->
+            DisplayContacts()
         }
     }
 }
