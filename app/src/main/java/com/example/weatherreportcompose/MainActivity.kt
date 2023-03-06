@@ -56,14 +56,6 @@ class MainActivity : ComponentActivity() {
         val fingerprints = getCertificateFingerprint(this, this.packageName)
         Log.w("fingerprint", fingerprints?.get(0)!!)
         VK.login(this, arrayListOf(VKScope.PHOTOS, VKScope.WALL, VKScope.AUDIO))
-        val call = VKMethodCall.Builder()
-            .method("users.get")
-            .args("fields", "photo_200")
-            .version("v5.131")
-            .build()
-
-        val request = VKApiManager.execute
-        VK.execute(request = PhotosGetAlbumsResponse())
         setContent {
             WeatherReportComposeTheme {
                 Navigation(application)
