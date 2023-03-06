@@ -1,5 +1,6 @@
 package com.example.weatherreportcompose
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.weatherreportcompose.Model.DataClasses.ForecastItem
@@ -190,22 +192,22 @@ fun screenBackground(viewModel: MainPageViewModel) {
             .background(Brush.verticalGradient(colors = colorStops))
     ) {
     }
-    Box(modifier = Modifier.pointerInput(Unit){
-        detectDragGestures (onDrag = { change, dragAmount ->
-            change.consume()
-            drag = dragAmount.x
+    Box(modifier = Modifier
+        .pointerInput(Unit) {
+            detectDragGestures(onDrag = { change, dragAmount ->
+                change.consume()
+                drag = dragAmount.x
 
-        },
-        onDragEnd = {
-            if(drag < 0){
+            },
+                onDragEnd = {
+                    if (drag < 0) {
 
-                viewModel.moveToNext()
-            }
-            else if(drag > 0){
-                viewModel.moveToPrevious()
-            }
-            drag = 0.0f
-        })
+                        viewModel.moveToNext()
+                    } else if (drag > 0) {
+                        viewModel.moveToPrevious()
+                    }
+                    drag = 0.0f
+                })
 //            when{
 //                y > 0 ->{
 //                    Log.e("Swipe", "Swipe Up")
@@ -214,7 +216,8 @@ fun screenBackground(viewModel: MainPageViewModel) {
 //
 //                    Log.e("Swipe", "Swipe down")}
 //            }
-    }.fillMaxSize())
+        }
+        .fillMaxSize())
     Surface(modifier = Modifier.pointerInput(Unit){
         detectDragGestures { change, dragAmount ->
             change.consume()
@@ -356,6 +359,17 @@ fun weatherInfoCard(weatherData: WeatherItem) {
 @Composable
 fun Header(weatherViewModel: MainPageViewModel, navController: NavController) {
     val city = weatherViewModel.weather.collectAsState().value.name
+    val context = LocalContext.current
+    val weather by weatherViewModel.weather.collectAsState()
+    val temp = (weather.main.temp.toBigDecimal().toInt() - 273).toString() + "°C"
+    val weatherState = weather.weather[0].description
+    val text = "It's ${temp} and ${weatherState} in ${city}"
+    val sendIntent = Intent.createChooser(Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, text)
+        putExtra(Intent.EXTRA_TITLE, "AAAA")
+        type = "image/*"
+    }, null)
     Row(
         modifier = Modifier
             .height(56.dp)
@@ -380,7 +394,7 @@ fun Header(weatherViewModel: MainPageViewModel, navController: NavController) {
             painter = painterResource(id = R.drawable.more_button),
             modifier = Modifier
                 .size(32.dp)
-                .clickable { navController.navigate(Screen.SevenDays.route) },
+                .clickable { context.startActivity(sendIntent) },
             contentDescription = "More"
         )
     }
