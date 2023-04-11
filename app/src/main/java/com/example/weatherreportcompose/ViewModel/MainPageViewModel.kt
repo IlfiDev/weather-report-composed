@@ -31,9 +31,8 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
     val weatherRepository = CityWeatherRepository()
     val locationRepository = IpLocationRepository()
     val suggestionRepository = CitySuggestionRepository()
-    private lateinit var locationsRepository: LocationsRepository
+    private var locationsRepository: LocationsRepository
     private val _location = MutableStateFlow(IpGeolocation())
-    val location = _location.asStateFlow()
 
     private val _weather = MutableStateFlow(WeatherItem())
     val weather = _weather.asStateFlow()
@@ -68,7 +67,7 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
             val lon = city.lon
             val name = city.name
 
-            Log.e("cityName", name.toString())
+            Log.e("cityName", name)
             updateWeather(lat!!, lon!!, name!!)
             updateForecast(lat, lon, name)
         }
@@ -79,13 +78,13 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
     fun moveToPrevious(){
         position--
         Log.w("Pos", position.toString())
-        if(position > 0){
+        if(position >= 0){
 
             val city = _citiesDB.value[position]
             val lat = city.lat
             val lon = city.lon
             val name = city.name
-            Log.e("cityName", name.toString())
+            Log.e("cityName", name)
             updateWeather(lat!!, lon!!, name!!)
             updateForecast(lat, lon, name)
         }
@@ -95,20 +94,14 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
         }
 
     }
-    fun removeCity(location: Location) = runBlocking{
-        rmCity(location)
-        getCitiesFromRepo()
-    }
-    private fun rmCity(location: Location) {
+    fun removeCity(location: Location) {
         CoroutineScope(Dispatchers.IO).launch{
             locationsRepository.removeLocation(location)
+            getCities()
         }
     }
-    fun getCities() = runBlocking{
-       getCitiesFromRepo()
-    }
 
-    private fun getCitiesFromRepo(){
+    fun getCities(){
         CoroutineScope(Dispatchers.IO).launch{
             val cities = locationsRepository.getLocations()
             Log.w("DB", _citiesDB.toString())
@@ -117,10 +110,7 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
             }
         }
     }
-    fun updateHome() = runBlocking {
-        updateCurrentLocation()
-    }
-    fun updateCurrentLocation(){
+    fun updateHome(){
         CoroutineScope(Dispatchers.IO).launch{
 
             var loc = IpGeolocation()
@@ -176,25 +166,20 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
 
     suspend fun updateSuggstion(request: String) {
         if ( request.length >=3){
-
             val response = suggestionRepository.getCitySuggestion(request)
             _suggestion.value = response.body()!!
         }
 
     }
 
-    fun addCity(suggestion: CitySuggestionModel) = runBlocking{
 
+    fun addCity(suggestion: CitySuggestionModel){
         val city = Location(name = suggestion.name, lat = suggestion.lat, lon = suggestion.lon, country = suggestion.country)
-        addCityToDB(city)
-    }
-
-    private fun addCityToDB(city: Location){
         CoroutineScope(Dispatchers.IO).launch {
 
             locationsRepository.addLocation(city)
 
-            getCitiesFromRepo()
+            getCities()
         }
     }
 

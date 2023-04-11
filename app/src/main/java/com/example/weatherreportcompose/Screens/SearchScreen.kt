@@ -13,7 +13,6 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,9 +26,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherreportcompose.Model.DB.Location
-import com.example.weatherreportcompose.Screen
 import com.example.weatherreportcompose.ViewModel.MainPageViewModel
-import com.example.weatherreportcompose.ViewModel.SearchCityViewModel
 import com.example.weatherreportcompose.screenBackground
 
 @Composable
