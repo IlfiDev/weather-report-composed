@@ -99,7 +99,7 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
         rmCity(location)
         getCitiesFromRepo()
     }
-    private suspend fun rmCity(location: Location) = coroutineScope {
+    private fun rmCity(location: Location) {
         CoroutineScope(Dispatchers.IO).launch{
             locationsRepository.removeLocation(location)
         }
@@ -108,7 +108,7 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
        getCitiesFromRepo()
     }
 
-    private suspend fun getCitiesFromRepo() = coroutineScope{
+    private fun getCitiesFromRepo(){
         CoroutineScope(Dispatchers.IO).launch{
             val cities = locationsRepository.getLocations()
             Log.w("DB", _citiesDB.toString())
@@ -120,23 +120,26 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
     fun updateHome() = runBlocking {
         updateCurrentLocation()
     }
-    suspend fun updateCurrentLocation() = coroutineScope {
-        var loc = IpGeolocation()
-        val job = launch {
-            val response = locationRepository.getLocation()
-            Log.e("IP", response.body().toString())
+    fun updateCurrentLocation(){
+        CoroutineScope(Dispatchers.IO).launch{
 
-            _location.value = response.body()!!
-            loc = _location.value
-            Log.e("Loc", loc.toString())
-        }
-        job.join()
-        launch {
-            launch{
-                updateWeather(loc.lat, loc.lon, loc.city)
+            var loc = IpGeolocation()
+            val job = launch {
+                val response = locationRepository.getLocation()
+                Log.e("IP", response.body().toString())
+
+                _location.value = response.body()!!
+                loc = _location.value
+                Log.e("Loc", loc.toString())
             }
-            launch{
-                updateForecast(loc.lat, loc.lat, loc.city)
+            job.join()
+            launch {
+                launch{
+                    updateWeather(loc.lat, loc.lon, loc.city)
+                }
+                launch{
+                    updateForecast(loc.lat, loc.lat, loc.city)
+                }
             }
         }
     }
@@ -186,7 +189,7 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
         addCityToDB(city)
     }
 
-    private suspend fun addCityToDB(city: Location){
+    private fun addCityToDB(city: Location){
         CoroutineScope(Dispatchers.IO).launch {
 
             locationsRepository.addLocation(city)
