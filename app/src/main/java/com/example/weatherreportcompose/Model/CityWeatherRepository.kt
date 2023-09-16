@@ -22,9 +22,11 @@ class CityWeatherRepository() {
 
 
     suspend fun getCurrentWeather(lat: Double, lon: Double, city: String = ""): Response<WeatherItem> {
+        Log.i("Weather", "Tried to get weather")
         val response = apiServices.getCurrentWeatherList("weather?lat=${lat}&lon=${lon}&appid=${APIKey}")
         try {
             if (response.isSuccessful) {
+                Log.i("tag", response.body().toString())
                 return response
             } else {
                 Log.e("tag", "Error:${response.code()}")

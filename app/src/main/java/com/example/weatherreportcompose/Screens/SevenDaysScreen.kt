@@ -2,6 +2,7 @@ package com.example.weatherreportcompose.ViewModel
 
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -33,6 +34,22 @@ import com.example.weatherreportcompose.R
 import com.example.weatherreportcompose.ui.theme.WeatherReportComposeTheme
 
 
+val smallImages = mapOf(
+    "Thunderstorm" to R.drawable.condition_thunderstorm,
+    "Drizzle" to R.drawable.condition_rain_opportunity,
+    "Rain" to R.drawable.condition_rain,
+    "Snow" to R.drawable.condition_snow,
+    "Mist" to R.drawable.condition_cloudy,
+    "Smoke" to R.drawable.condition_cloudy,
+    "Haze" to R.drawable.condition_cloudy,
+    "Dust" to R.drawable.condition_cloudy,
+    "Fog" to R.drawable.condition_cloudy,
+    "Ash" to R.drawable.condition_cloudy,
+    "Squall" to R.drawable.condition_cloudy,
+    "Tornado" to R.drawable.condition_cloudy,
+    "Clear" to R.drawable.condition_sunny,
+    "Clouds" to R.drawable.condition_cloudy
+)
 @Composable
 fun ScreenSeven(weatherViewModel: MainPageViewModel, navController: NavController){
     val weatherItem = weatherViewModel.weather.collectAsState().value
@@ -53,12 +70,17 @@ fun ScreenSeven(weatherViewModel: MainPageViewModel, navController: NavControlle
 }
 @Composable
 fun DaysColumn(forecastItem: ForecastItem){
-
-    for(item in forecastItem.list){
+    val newArray = arrayListOf<WeatherItem>()
+    for(i in 0 until 5){
+        val max = forecastItem.list.slice(i .. i + 8).maxBy { it.main.temp_max }
+        val min = forecastItem.list.slice(i .. i + 8).minBy { it.main.temp_min }
+        max.main.temp_min = min.main.temp_min
+        newArray.add(max)
+        Log.i("WeatherItem", max.toString())
 
     }
     LazyColumn {
-        items(forecastItem.list) { arrItme ->
+        items(newArray) { arrItme ->
             DayCard(weatherInfo = arrItme)
         }
     }
@@ -119,7 +141,7 @@ fun DayCard(weatherInfo: WeatherItem){
         }
 
         Spacer(modifier = Modifier.width(152.dp))
-        Image(painter = painterResource(id = R.drawable.ic_launcher_background),
+        Image(painter = painterResource(smallImages[weatherInfo.weather[0].main]!!),
             contentDescription = null,
             modifier = Modifier.size(24.dp),
 

@@ -11,7 +11,7 @@ data class Main(
     val sea_level: Int,
     val temp: Double,
     val temp_max: Double,
-    val temp_min: Double
+    var temp_min: Double
 )
 data class Clouds(
     val all: Int

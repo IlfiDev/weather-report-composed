@@ -29,7 +29,8 @@ fun Navigation(application: Application){
         }
         composable(
             route = Screen.SevenDays.route
-        ){ backStackEntry ->
+        ){
+                backStackEntry ->
             ScreenSeven(weatherViewModel = weatherViewModel, navController = navController)
         }
 

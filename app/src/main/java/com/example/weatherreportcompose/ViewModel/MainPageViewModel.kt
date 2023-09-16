@@ -92,7 +92,6 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
             position = -1
             updateHome()
         }
-
     }
     fun removeCity(location: Location) {
         CoroutineScope(Dispatchers.IO).launch{
@@ -160,16 +159,11 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
 
     fun getSuggestion(request: String) = runBlocking {
         CoroutineScope(Dispatchers.IO).launch{
-            updateSuggstion(request)
+            if ( request.length >=3){
+                val response = suggestionRepository.getCitySuggestion(request)
+                _suggestion.value = response.body()!!
+            }
         }
-    }
-
-    suspend fun updateSuggstion(request: String) {
-        if ( request.length >=3){
-            val response = suggestionRepository.getCitySuggestion(request)
-            _suggestion.value = response.body()!!
-        }
-
     }
 
 
@@ -178,7 +172,6 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
         CoroutineScope(Dispatchers.IO).launch {
 
             locationsRepository.addLocation(city)
-
             getCities()
         }
     }

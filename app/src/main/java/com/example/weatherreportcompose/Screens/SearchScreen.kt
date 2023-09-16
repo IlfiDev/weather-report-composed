@@ -86,7 +86,7 @@ fun SearchText(viewModel: MainPageViewModel){
 @Composable
 fun DisplayCities(cities: List<Location>, viewModel: MainPageViewModel){
 
-    LazyColumn{
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(5.dp)){
         items(cities.toList()){
             item ->
             CitiesCard(city = item, viewModel)
@@ -103,10 +103,10 @@ fun CitiesCard(city: Location, viewModel: MainPageViewModel){
     Card(
         modifier = Modifier
             .size(335.dp, 86.dp)
-            .background(Color(0x19C9DBED)).clickable {  }
+            .background(color = Color.Transparent)
+            .clickable {  }
             .pointerInput(Unit){
                                detectTapGestures(onLongPress = {
-                                   Log.w("A","AAAAAAAA")
                                    viewModel.removeCity(city)
                                })
             } ,
@@ -114,11 +114,7 @@ fun CitiesCard(city: Location, viewModel: MainPageViewModel){
         elevation = 0.dp
     ){
         Column(modifier = Modifier.fillMaxHeight()){
-            Text(name!!, modifier = Modifier.size(100.dp, 40.dp))
-            Row{
-                Text("28")
-                Text("18")
-            }
+            Text(name, modifier = Modifier.size(100.dp, 40.dp))
         }
     }
 }
