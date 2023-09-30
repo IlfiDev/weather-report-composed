@@ -50,6 +50,13 @@ val smallImages = mapOf(
     "Clear" to R.drawable.condition_sunny,
     "Clouds" to R.drawable.condition_cloudy
 )
+
+@Composable
+@Preview
+fun ScreenSevenPreview() {
+//    val viewmodel = MainPageViewModel(this)
+//    ScreenSeven(weatherViewModel = viewmodel, navController = null)
+}
 @Composable
 fun ScreenSeven(weatherViewModel: MainPageViewModel, navController: NavController){
     val weatherItem = weatherViewModel.weather.collectAsState().value
@@ -72,8 +79,8 @@ fun ScreenSeven(weatherViewModel: MainPageViewModel, navController: NavControlle
 fun DaysColumn(forecastItem: ForecastItem){
     val newArray = arrayListOf<WeatherItem>()
     for(i in 0 until 5){
-        val max = forecastItem.list.slice(i .. i + 8).maxBy { it.main.temp_max }
-        val min = forecastItem.list.slice(i .. i + 8).minBy { it.main.temp_min }
+        val max = forecastItem.list.slice(i * 8 .. (i * 8) + 7).maxBy { it.main.temp_max }
+        val min = forecastItem.list.slice(i * 8 .. (i * 8) + 7).minBy { it.main.temp_min }
         max.main.temp_min = min.main.temp_min
         newArray.add(max)
         Log.i("WeatherItem", max.toString())
@@ -130,7 +137,9 @@ fun DayCard(weatherInfo: WeatherItem){
         horizontalArrangement = Arrangement.SpaceAround
     ){
 
-        Text("today", style = TextStyle(fontSize = 17.sp, color = Color.White),
+        val date = weatherInfo.dt_txt.split(" ")[0].split("-")
+        Log.i("ABOBA", date[2] + "." + date[1])
+        Text(date[2] + "." + date[1], style = TextStyle(fontSize = 17.sp, color = Color.White),
         modifier = Modifier.size(80.dp, 20.dp))
         Spacer(modifier = Modifier.width(24.dp))
         Row(modifier = Modifier.size(60.dp, 16.dp),

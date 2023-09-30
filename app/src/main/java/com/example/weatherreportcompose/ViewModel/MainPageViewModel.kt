@@ -139,6 +139,9 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
             val response = weatherRepository.getCurrentWeather(lat, lon, city)
             Log.e("Weather", response.body().toString())
             withContext(Dispatchers.Main) {
+                if (response.body() == null) {
+                    return@withContext
+                }
                 _weather.value = response.body()!!
             }
         }
@@ -150,6 +153,9 @@ class MainPageViewModel(private val application: Application) : AndroidViewModel
             val response = weatherRepository.getWeatherForecast(lat, lon, city)
             Log.e("Forecast", response.body().toString())
             withContext(Dispatchers.Main){
+                if (response.body() == null) {
+                    return@withContext
+                }
                 _forecast.value = response.body()!!
             }
         }

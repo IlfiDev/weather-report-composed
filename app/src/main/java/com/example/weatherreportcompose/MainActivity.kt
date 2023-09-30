@@ -388,7 +388,7 @@ fun Header(weatherViewModel: MainPageViewModel, navController: NavController) {
         )
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(city , style = TextStyle(color = Color.White, fontSize = 14.sp))
-            Text("nav")
+//            Text("nav")
         }
         Image(
             painter = painterResource(id = R.drawable.more_button),
